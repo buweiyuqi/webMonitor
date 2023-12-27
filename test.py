@@ -2,6 +2,8 @@ import logging
 import time
 import random
 import traceback
+import proxy
+import requests
 
 from selenium.webdriver.common.by import By
 
@@ -12,13 +14,14 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.common.action_chains import ActionChains
 logging.basicConfig(filename='test.log', level=logging.INFO)
 class MerchandiseMonitorWithProxy:
-    def __init__(self, url, proxies, check_interval=5):
+    def __init__(self, url, check_interval=5):
         self.url = url
-        self.proxies = proxies
+        # self.proxies = proxies
         self.check_interval = check_interval
+        self.proxy = proxy.MyProxy(host='http://127.0.0.1', port='5010')
 
     def get_proxy(self):
-        return random.choice(self.proxies)
+        return self.proxy.get_proxy().get('proxy')
 
     def random_sleep(self, min_seconds, max_seconds):
         t = random.uniform(min_seconds, max_seconds)
@@ -46,18 +49,19 @@ class MerchandiseMonitorWithProxy:
     def start_monitoring(self):
         print(f'Start monitoring url: {self.url}')
         while True:
-            # proxy_ip = self.get_proxy()
-            # webdriver_proxy = Proxy({
-            #     'proxyType': ProxyType.MANUAL,
-            #     'httpProxy': proxy_ip,
-            #     'ftpProxy': proxy_ip,
-            #     'sslProxy': proxy_ip,
-            #     'noProxy': ''
-            # })
+            proxy_ip = self.get_proxy()
+            webdriver_proxy = Proxy({
+                'proxyType': ProxyType.MANUAL,
+                'httpProxy': proxy_ip,
+                'ftpProxy': proxy_ip,
+                'sslProxy': proxy_ip,
+                'noProxy': ''
+            })
 
-            # options = webdriver.ChromeOptions()
-            # options.proxy = webdriver_proxy
-            driver = webdriver.Chrome()
+            options = webdriver.ChromeOptions()
+            options.proxy = webdriver_proxy
+            driver = webdriver.Chrome(options=options)
+            # driver = webdriver.Chrome()
 
             try:
                 driver.get(self.url)
@@ -101,7 +105,9 @@ class MerchandiseMonitorWithProxy:
 
 if __name__=="__main__":
     # Example usage
-    proxies = ["ip1:port", "ip2:port", ...]  # Replace with your proxy IPs
-    url = 'http://localhost:8000/test.html'
-    monitor = MerchandiseMonitorWithProxy(url, proxies)
+    # proxy = proxy.Proxy(host='http://127.0.0.1', port='5010')
+    # proxies = [proxy.get_proxy() for _ in range(10)]  # Replace with your proxy IPs
+    # https://bck.hermes.com/products?locale=us_en&category=WOMEN&sort=relevance&offset=48&pagesize=48&available_online=false
+    url = 'https://www.hermes.com/us/en/category/women/#|'
+    monitor = MerchandiseMonitorWithProxy(url)
     monitor.start_monitoring()
