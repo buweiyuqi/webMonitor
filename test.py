@@ -70,8 +70,9 @@ class MerchandiseMonitorWithProxy:
                 recipient_email = "weiyuqi723@126.com"  # Replace with the recipient's email address
 
                 # ... Inside your monitoring loop
-                if self.is_new_merchandise_available(driver, recipient_email):
-                    print("New merchandise available and email notification sent.")
+                # if self.is_new_merchandise_available(driver, recipient_email):
+                #     print("New merchandise available and email notification sent.")
+                self.get_all_items(driver)
 
                 self.random_sleep(self.check_interval, self.check_interval + 10)
             except Exception as e:
@@ -102,6 +103,20 @@ class MerchandiseMonitorWithProxy:
                 return True
         except:
             return False
+
+    def get_all_items(self, driver):
+        # Find all product elements on the page
+        product_elements = driver.find_elements(By.CLASS_NAME, "product-grid-list-item")
+
+        products = []
+        for element in product_elements:
+            product_id = element.get_attribute('id').replace('grid-product-', '')
+            product_info = {
+                'product_id': product_id,
+                'html': element.get_attribute('outerHTML')
+            }
+            products.append(product_info)
+        return products
 
 if __name__=="__main__":
     # Example usage
