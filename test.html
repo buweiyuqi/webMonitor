@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Merchandise Test Page</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to Our Merchandise Page</h1>
+<div id="new-merchandise-button" class="hidden">
+    New Merchandise Available!
+</div>
+
+<script>
+    function toggleMerchandiseDisplay() {
+        var shouldDisplay = Math.random() < 0.5; // 50% chance
+        var merchandiseButton = document.getElementById('new-merchandise-button');
+
+        if (shouldDisplay) {
+            merchandiseButton.classList.remove('hidden');
+        } else {
+            merchandiseButton.classList.add('hidden');
+        }
+    }
+
+    // Run the function when the page loads
+    document.addEventListener('DOMContentLoaded', toggleMerchandiseDisplay);
+</script>
+
+</body>
+</html>
