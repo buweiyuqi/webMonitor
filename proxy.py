@@ -8,4 +8,5 @@ class MyProxy:
         return requests.get(f"{self.host}:{self.port}/get/").json()
 
     def delete_proxy(self, proxy):
+        print(f'deleting {proxy}')
         requests.get(f"{self.host}:{self.port}/delete/?proxy={proxy}")
