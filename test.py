@@ -61,13 +61,20 @@ class MerchandiseMonitorWithProxy:
     def start_monitoring(self):
         print(f'Start monitoring url: {self.urls}')
         while True:
-            proxy_ip = self.get_proxy()
-            print(f'proxy ip: {proxy_ip}')
+            # proxy_ip = self.get_proxy()
+            # print(f'proxy ip: {proxy_ip}')
+            # webdriver_proxy = Proxy({
+            #     'proxyType': ProxyType.MANUAL,
+            #     'httpProxy': proxy_ip,
+            #     'ftpProxy': proxy_ip,
+            #     'sslProxy': proxy_ip,
+            #     'noProxy': ''
+            # })
             webdriver_proxy = Proxy({
                 'proxyType': ProxyType.MANUAL,
-                'httpProxy': proxy_ip,
-                'ftpProxy': proxy_ip,
-                'sslProxy': proxy_ip,
+                'httpProxy': '127.0.0.1:7890',
+                'ftpProxy': '127.0.0.1:7890',
+                'sslProxy': '127.0.0.1:7890',
                 'noProxy': ''
             })
 
@@ -79,6 +86,39 @@ class MerchandiseMonitorWithProxy:
             # driver = webdriver.Chrome()
 
             try:
+                pre_url = 'https://www.hermes.com/hk/en/category/women/#|'
+                driver.get(pre_url)
+                str_cookies = """
+                {
+                    "_gcl_au": "1.1.1999447864.1703668752",
+                    "_gid": "GA1.2.2031282288.1703668752",
+                    "_gcl_aw": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                    "_gcl_dc": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                    "GeoFilteringBanner": "1",
+                    "_gac_UA-64545050-1": "1.1703668775.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                    "x-xsrf-token": "01ab0375-fc16-4f84-90a9-383d55b576fa",
+                    "correlation_id": "4640tun2r1cy84behp407l1eiz5sct87o9vm2i06fzen2kbtdww7mxxydtqr3yc5",
+                    "rskxRunCookie": "0",
+                    "rCookie": "e7h4e6uv78p9f6zw9zix08lqnkelts",
+                    "_fbp": "fb.1.1703668874990.1342944327",
+                    "lastRskxRun": "1703668991059",
+                    "_uetsid": "ff771a60a49811ee9d737b956ee4f0e8",
+                    "_uetvid": "ff775690a49811eea009c1d73b608275",
+                    "_cs_c": "1",
+                    "_cs_id": "704df16b-a9d5-ac0a-98b3-c5e44076861e.1703684995.1.1703684995.1703684995.1.1737848995989",
+                    "ECOM_SESS": "5fe9w16n0v0yksii8d3nqz6zif",
+                    "_cs_mk": "0.10211864199946152_1703734631765",
+                    "_ga": "GA1.2.1494663094.1703668752",
+                    "_ga_Y862HCHCQ7": "GS1.1.1703734632.4.0.1703734633.0.0.0",
+                    "datadome": "o4LZLp0t6Baos7wfeMc2Br3_8GeZVWYq7c2Nny93Do~MDKKN7A~RvBhY0K23PsPHr_rsG2cnnb1BokfBl_Z82gefopSkQfnJTFXSUnrugq_ojEX751QimejpciVxyHj2"
+                }
+                """
+                cookies = json.loads(str_cookies)
+                driver.delete_all_cookies()
+                for key, value in cookies.items():
+                    driver.add_cookie({"name": key, "value": value})
+                # driver.add_cookies(cookies)
+                driver.refresh()
                 for url in self.urls:
                     result = driver.get(url)
                     self.simulate_user_activity(driver)
@@ -161,7 +201,7 @@ class MerchandiseMonitorWithProxy:
 if __name__ == "__main__":
     # https://bck.hermes.com/products?locale=us_en&category=WOMEN&sort=relevance&offset=48&pagesize=48&available_online=false
     # https://www.hermes.com/hk/en/category/women/#|
-    url_basic = 'https://bck.hermes.com/products?locale=us_en&category=WOMEN&sort=relevance&available_online=false'
+    url_basic = 'https://bck.hermes.com/products?locale=hk_en&category=WOMEN&sort=relevance&available_online=false'
     urls = [url_basic + f'&offset={500 * i}&pagesize=500' for i in range(5)]
     monitor = MerchandiseMonitorWithProxy(urls, check_interval=10)
     monitor.start_monitoring()
