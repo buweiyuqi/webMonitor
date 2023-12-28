@@ -25,8 +25,8 @@ logging.basicConfig(
 
 
 class MerchandiseMonitorWithProxy:
-    def __init__(self, url, subscribed_products=None, check_interval=60):
-        self.url = url
+    def __init__(self, urls, subscribed_products=None, check_interval=5):
+        self.urls = urls
         # self.proxies = proxies
         self.check_interval = check_interval
         self.proxy = proxy.MyProxy(host='http://127.0.0.1', port='5010')
@@ -59,7 +59,7 @@ class MerchandiseMonitorWithProxy:
             logging.info(f"random click on x:{x_offset}, y: {y_offset}")
 
     def start_monitoring(self):
-        print(f'Start monitoring url: {self.url}')
+        print(f'Start monitoring url: {self.urls}')
         while True:
             proxy_ip = self.get_proxy()
             print(f'proxy ip: {proxy_ip}')
@@ -79,18 +79,19 @@ class MerchandiseMonitorWithProxy:
             # driver = webdriver.Chrome()
 
             try:
-                print(f'Getting {self.url}')
-                driver.get(self.url)
-                self.simulate_user_activity(driver)
+                for url in self.urls:
+                    result = driver.get(url)
+                    self.simulate_user_activity(driver)
 
-                recipient_email = "weiyuqi723@126.com"  # Replace with the recipient's email address
+                    recipient_email = "weiyuqi723@126.com"  # Replace with the recipient's email address
 
-                # ... Inside your monitoring loop
-                # if self.is_new_merchandise_available(driver, recipient_email):
-                #     print("New merchandise available and email notification sent.")
-                pprint(self.get_all_items(driver))
+                    # ... Inside your monitoring loop
+                    # if self.is_new_merchandise_available(driver, recipient_email):
+                    #     print("New merchandise available and email notification sent.")
+                    # self.get_all_items(driver)
+                    self.save_items_from_api(result['products'])
 
-                self.random_sleep(self.check_interval, self.check_interval + 10)
+                    self.random_sleep(self.check_interval, self.check_interval + 10)
             except Exception as e:
                 print(f"Error accessing site with proxy {proxy_ip}: {e}")
                 traceback.print_exc()
@@ -143,6 +144,11 @@ class MerchandiseMonitorWithProxy:
 
         return products
 
+    def save_items_from_api(self, products):
+        with open("products_list.json", 'w+') as f:
+            json.dump(products, f)
+        print('Products Saved!')
+
     def notify_subscriber(self, product_id, product_element):
         product_details = "..."  # Extract necessary product details
         try:
@@ -154,7 +160,8 @@ class MerchandiseMonitorWithProxy:
 
 if __name__ == "__main__":
     # https://bck.hermes.com/products?locale=us_en&category=WOMEN&sort=relevance&offset=48&pagesize=48&available_online=false
-    url = 'https://www.hermes.com/hk/en/category/women/#|'
-    # url = 'https://bck.hermes.com/products?locale=hk_en&category=WOMEN&sort=relevance&available_online=false'
-    monitor = MerchandiseMonitorWithProxy(url)
+    # https://www.hermes.com/hk/en/category/women/#|
+    url_basic = 'https://bck.hermes.com/products?locale=us_en&category=WOMEN&sort=relevance&available_online=false'
+    urls = [url_basic + f'&offset={500 * i}&pagesize=500' for i in range(5)]
+    monitor = MerchandiseMonitorWithProxy(urls, check_interval=10)
     monitor.start_monitoring()
