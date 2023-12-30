@@ -5,7 +5,7 @@ import random
 import traceback
 
 import proxy
-
+import pandas as pd
 from selenium.webdriver.common.by import By
 
 from send_email import send_email
@@ -13,6 +13,7 @@ from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.common.action_chains import ActionChains
 import undetected_chromedriver as uc
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -26,9 +27,9 @@ class ProductMonitorWithProxy:
     def __init__(self, urls, subscribed_products=None, check_interval=5):
         self.urls = urls
         # self.proxies = proxies
-        self.proxies = self.loads_local_proxies()
-        self.check_interval = check_interval
+        # self.proxies = self.loads_local_proxies()
         self.proxy = proxy.MyProxy(host='http://127.0.0.1', port='5010')
+        self.check_interval = check_interval
         self.subscribed_products = subscribed_products or []
 
     def get_proxy(self):
@@ -59,16 +60,17 @@ class ProductMonitorWithProxy:
             action = ActionChains(driver)
             element = driver.find_element(By.TAG_NAME, 'body')
             print(element.size)
-            x_offset = random.randint(0, element.size['width'] - 10)
-            y_offset = random.randint(0, element.size['height'] - 10)
+            x_offset = random.randint(0, element.size['width'] - 20)
+            y_offset = random.randint(0, element.size['height'] - 20)
             action.move_to_element_with_offset(element, x_offset, y_offset).click().perform()
             logging.info(f"random click on x:{x_offset}, y: {y_offset}")
 
     def start_monitoring(self):
         print(f'Start monitoring url: {self.urls}')
         while True:
-            proxy_ip = random.choice(self.proxies)
-            print(f'proxy ip: {proxy_ip}')
+            # proxy_ip = random.choice(self.proxies)
+            # proxy_ip = self.get_proxy()
+            # print(f'proxy ip: {proxy_ip}')
             # webdriver_proxy = Proxy({
             #     'proxyType': ProxyType.MANUAL,
             #     'httpProxy': proxy_ip,
@@ -76,6 +78,7 @@ class ProductMonitorWithProxy:
             #     'sslProxy': proxy_ip,
             #     'noProxy': ''
             # })
+            proxy_ip = '127.0.0.1:7890'
             # webdriver_proxy = Proxy({
             #     'proxyType': ProxyType.MANUAL,
             #     'httpProxy': '127.0.0.1:7890',
@@ -93,42 +96,43 @@ class ProductMonitorWithProxy:
             # driver = webdriver.Chrome()
 
             try:
-                driver.get('https://nowsecure.nl')
-                pre_url = 'https://www.hermes.com/hk/en/category/women/#|'
-                driver.get(pre_url)
-                str_cookies = """
-                {
-                    "_gcl_au": "1.1.1999447864.1703668752",
-                    "_gid": "GA1.2.2031282288.1703668752",
-                    "_gcl_aw": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
-                    "_gcl_dc": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
-                    "GeoFilteringBanner": "1",
-                    "_gac_UA-64545050-1": "1.1703668775.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
-                    "x-xsrf-token": "01ab0375-fc16-4f84-90a9-383d55b576fa",
-                    "correlation_id": "4640tun2r1cy84behp407l1eiz5sct87o9vm2i06fzen2kbtdww7mxxydtqr3yc5",
-                    "rskxRunCookie": "0",
-                    "rCookie": "e7h4e6uv78p9f6zw9zix08lqnkelts",
-                    "_fbp": "fb.1.1703668874990.1342944327",
-                    "lastRskxRun": "1703668991059",
-                    "_uetsid": "ff771a60a49811ee9d737b956ee4f0e8",
-                    "_uetvid": "ff775690a49811eea009c1d73b608275",
-                    "_cs_c": "1",
-                    "_cs_id": "704df16b-a9d5-ac0a-98b3-c5e44076861e.1703684995.1.1703684995.1703684995.1.1737848995989",
-                    "ECOM_SESS": "5fe9w16n0v0yksii8d3nqz6zif",
-                    "_cs_mk": "0.10211864199946152_1703734631765",
-                    "_ga": "GA1.2.1494663094.1703668752",
-                    "_ga_Y862HCHCQ7": "GS1.1.1703734632.4.0.1703734633.0.0.0",
-                    "datadome": "o4LZLp0t6Baos7wfeMc2Br3_8GeZVWYq7c2Nny93Do~MDKKN7A~RvBhY0K23PsPHr_rsG2cnnb1BokfBl_Z82gefopSkQfnJTFXSUnrugq_ojEX751QimejpciVxyHj2"
-                }
-                """
-                cookies = json.loads(str_cookies)
-                driver.delete_all_cookies()
-                for key, value in cookies.items():
-                    driver.add_cookie({"name": key, "value": value})
+                # driver.get('https://nowsecure.nl')
+                # pre_url = 'https://www.hermes.com/hk/en/category/women/#|'
+                # driver.get(pre_url)
+                # str_cookies = """
+                # {
+                #     "_gcl_au": "1.1.1999447864.1703668752",
+                #     "_gid": "GA1.2.2031282288.1703668752",
+                #     "_gcl_aw": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                #     "_gcl_dc": "GCL.1703668755.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                #     "GeoFilteringBanner": "1",
+                #     "_gac_UA-64545050-1": "1.1703668775.CjwKCAiAs6-sBhBmEiwA1Nl8swygJIazS7n1L-12P8yEKSQhImbSQxczYjCC0KBvP5fxTVLhHBphWRoCDlIQAvD_BwE",
+                #     "x-xsrf-token": "01ab0375-fc16-4f84-90a9-383d55b576fa",
+                #     "correlation_id": "4640tun2r1cy84behp407l1eiz5sct87o9vm2i06fzen2kbtdww7mxxydtqr3yc5",
+                #     "rskxRunCookie": "0",
+                #     "rCookie": "e7h4e6uv78p9f6zw9zix08lqnkelts",
+                #     "_fbp": "fb.1.1703668874990.1342944327",
+                #     "lastRskxRun": "1703668991059",
+                #     "_uetsid": "ff771a60a49811ee9d737b956ee4f0e8",
+                #     "_uetvid": "ff775690a49811eea009c1d73b608275",
+                #     "_cs_c": "1",
+                #     "_cs_id": "704df16b-a9d5-ac0a-98b3-c5e44076861e.1703684995.1.1703684995.1703684995.1.1737848995989",
+                #     "ECOM_SESS": "5fe9w16n0v0yksii8d3nqz6zif",
+                #     "_cs_mk": "0.10211864199946152_1703734631765",
+                #     "_ga": "GA1.2.1494663094.1703668752",
+                #     "_ga_Y862HCHCQ7": "GS1.1.1703734632.4.0.1703734633.0.0.0",
+                #     "datadome": "o4LZLp0t6Baos7wfeMc2Br3_8GeZVWYq7c2Nny93Do~MDKKN7A~RvBhY0K23PsPHr_rsG2cnnb1BokfBl_Z82gefopSkQfnJTFXSUnrugq_ojEX751QimejpciVxyHj2"
+                # }
+                # """
+                # cookies = json.loads(str_cookies)
+                # driver.delete_all_cookies()
+                # for key, value in cookies.items():
+                #     driver.add_cookie({"name": key, "value": value})
                 # driver.add_cookies(cookies)
-                driver.refresh()
+                # driver.refresh()
+                result = []
                 for url in self.urls:
-                    result = driver.get(url)
+                    response = driver.get(url)
                     self.simulate_user_activity(driver)
 
                     recipient_email = "weiyuqi723@126.com"  # Replace with the recipient's email address
@@ -137,9 +141,11 @@ class ProductMonitorWithProxy:
                     # if self.is_new_merchandise_available(driver, recipient_email):
                     #     print("New merchandise available and email notification sent.")
                     # self.get_all_items(driver)
-                    self.save_items_from_api(result['products'])
+                    result.appeend(response['products'])
+                    # self.save_items_from_api(response['products'])
 
                     self.random_sleep(self.check_interval, self.check_interval + 10)
+
             except Exception as e:
                 print(f"Error accessing site with proxy {proxy_ip}: {e}")
                 traceback.print_exc()
@@ -149,6 +155,45 @@ class ProductMonitorWithProxy:
                 self.proxy.delete_proxy(proxy_ip)
                 logging.info('Driver quit...')
 
+    def get_all_products(self):
+            print(f'Start collecting url: {self.urls}')
+            # proxy_ip = random.choice(self.proxies)
+            # proxy_ip = self.get_proxy()
+            # print(f'proxy ip: {proxy_ip}')
+            # webdriver_proxy = Proxy({
+            #     'proxyType': ProxyType.MANUAL,
+            #     'httpProxy': proxy_ip,
+            #     'ftpProxy': proxy_ip,
+            #     'sslProxy': proxy_ip,
+            #     'noProxy': ''
+            # })
+            proxy_ip = '127.0.0.1:7890'
+
+            options = uc.ChromeOptions()
+            # options.add_argument('headless')
+            # options.add_argument('--disable-gpu')
+            options.add_argument(f'--proxy-server={proxy_ip}')
+            driver = uc.Chrome(options=options)
+
+            try:
+                result = []
+                for url in self.urls:
+                    driver.get(url)
+                    response = driver.find_element(By.TAG_NAME, 'pre').text
+                    response = json.loads(response)
+                    # self.simulate_user_activity(driver)
+                    result += response['products']['items']
+                    self.save_items_from_api(response['products']['items'])
+                    self.random_sleep(self.check_interval, self.check_interval + 10)
+                print(f'Total number of products: {len(result)}')
+            except Exception as e:
+                print(f"Error accessing site with proxy {proxy_ip}: {e}")
+                traceback.print_exc()
+
+            finally:
+                # driver.quit()
+                self.proxy.delete_proxy(proxy_ip)
+                logging.info('Driver quit...')
 
     def is_new_product_available(self, driver, recipient_email):
         try:
@@ -183,9 +228,12 @@ class ProductMonitorWithProxy:
         return products
 
     def save_items_from_api(self, products):
-        with open("products_list.json", 'w+') as f:
-            json.dump(products, f)
-        print('Products Saved!')
+        # with open("products_list.json", 'w+') as f:
+        #     json.dump(products, f)
+        # print('Products Saved!')
+        df = pd.DataFrame(products)
+        print(f'save {len(products)} products')
+        df.to_csv('products2.csv', index=False, mode='a')
 
     def notify_subscriber(self, product_id, product_element):
         product_details = "..."  # Extract necessary product details
@@ -204,7 +252,7 @@ if __name__ == "__main__":
     url_basic = 'https://bck.hermes.com/products?locale=hk_en&category=WOMEN&sort=relevance&available_online=false'
     urls = [url_basic + f'&offset={500 * i}&pagesize=500' for i in range(5)]
     monitor = ProductMonitorWithProxy(urls, check_interval=10)
-    monitor.start_monitoring()
+    monitor.get_all_products()
 
 
 #CRUo6xiI89nvkfXn4tH9PJuBFYyJ
