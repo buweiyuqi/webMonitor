@@ -1,0 +1,46 @@
+{
+  "monitoring": {
+    "check_interval_minutes": 5,
+    "urls": [
+      "http://localhost:5001/api/products"
+    ]
+  },
+  "watchlist": {
+    "products": [
+      {
+        "name_contains": "Birkin",
+        "max_price": 100000,
+        "min_price": 80000
+      },
+      {
+        "name_contains": "Kelly",
+        "max_price": 90000,
+        "min_price": 70000
+      },
+      {
+        "name_contains": "Limited",
+        "max_price": 200000,
+        "min_price": 100000
+      },
+      {
+        "name_contains": "Special",
+        "max_price": 100000,
+        "min_price": 50000
+      }
+    ]
+  },
+  "email": {
+    "smtp_server": "smtp.163.com",
+    "smtp_port": 465,
+    "sender_email": "inform723@163.com",
+    "sender_password": "test_password",
+    "recipient_emails": [
+      "weiyuqi723@126.com"
+    ],
+    "subject_prefix": "[TEST监控]"
+  },
+  "storage": {
+    "last_products_file": "result/test_last_products.json",
+    "log_file": "result/test_monitor.log"
+  }
+}

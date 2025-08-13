@@ -1,0 +1,46 @@
+{
+  "monitoring": {
+    "check_interval_minutes": 30,
+    "urls": [
+      "https://www.hermes.com/hk/en/category/women/bags-and-small-leather-goods/bags-and-clutches/"
+    ]
+  },
+  "watchlist": {
+    "products": [
+      {
+        "name_contains": "Birkin",
+        "max_price": 100000,
+        "min_price": 50000
+      },
+      {
+        "name_contains": "Kelly",
+        "max_price": 90000,
+        "min_price": 40000
+      },
+      {
+        "name_contains": "Picotin",
+        "max_price": 50000,
+        "min_price": 20000
+      },
+      {
+        "name_contains": "Roulis",
+        "max_price": 80000,
+        "min_price": 60000
+      }
+    ]
+  },
+  "email": {
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "your_email@gmail.com",
+    "sender_password": "your_app_password",
+    "recipient_emails": [
+      "your_email@gmail.com"
+    ],
+    "subject_prefix": "[Hermès监控]"
+  },
+  "storage": {
+    "last_products_file": "result/last_products.json",
+    "log_file": "result/monitor.log"
+  }
+}
