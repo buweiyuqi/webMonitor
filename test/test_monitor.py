@@ -7,17 +7,18 @@ Uses the existing hermes_monitor.py functionality with test server configuration
 import sys
 import os
 import json
+import traceback
 from datetime import datetime
 
 # Import the main monitoring class
 sys.path.append(os.path.dirname(__file__) + '/..')
 
 try:
-    from hermes_monitor import HermesMonitor
-    print("✅ Successfully imported HermesMonitor from hermes_monitor.py")
+    from hermes_monitor.hermes_monitor import HermesMonitor
+    print("✅ Successfully imported HermesMonitor from hermes_monitor/hermes_monitor.py")
 except ImportError as e:
     print(f"❌ Error importing HermesMonitor: {e}")
-    print("Make sure hermes_monitor.py is in the parent directory")
+    print("Make sure hermes_monitor.py is in the hermes_monitor/ directory")
     exit(1)
 
 class TestHermesWrapper:
@@ -44,7 +45,17 @@ class TestHermesWrapper:
                 response = requests.get("http://localhost:5001/api/products", timeout=10)
                 response.raise_for_status()
                 data = response.json()
-                return data.get('products', [])
+                products = data.get('products', [])
+                
+                # Add missing product_url field
+                for product in products:
+                    if 'product_url' not in product:
+                        sku = product.get('sku', 'unknown')
+                        product['product_url'] = f"http://localhost:5001/product/{sku}"
+                    if 'image_url' not in product:
+                        product['image_url'] = product.get('image', '')
+                
+                return products
             except Exception as e:
                 monitor.logger.error(f"Test server error: {e}")
                 return []
@@ -55,7 +66,7 @@ class TestHermesWrapper:
         # Override the result directory
         monitor.result_dir = "../result"
         monitor.last_products_file = "../result/test_last_products.json"
-        monitor.config["storage"]["log_file"] = "../result/test_monitor.log"
+        monitor.config["storage"]["log_file"] = "test_monitor.log"
         
         print("✅ Test monitor configured successfully")
         
@@ -89,24 +100,24 @@ class TestHermesWrapper:
         
         # Create test config with server-specific overrides
         test_config = base_config.copy()
-        test_config.update({
-            "monitoring": {
-                "check_interval_minutes": 1,
-                "urls": ["http://localhost:5001/api/products"]
-            },
-            "email": {
-                "smtp_server": test_config.get("email", {}).get("smtp_server", "smtp.163.com"),
-                "smtp_port": test_config.get("email", {}).get("smtp_port", 465),
-                "sender_email": test_config.get("email", {}).get("sender_email", "inform723@163.com"),
-                "sender_password": "test_password",  # Override for testing
-                "recipient_emails": test_config.get("email", {}).get("recipient_emails", ["weiyuqi723@126.com"]),
-                "subject_prefix": "[TEST监控]"
-            },
-            "storage": {
-                "last_products_file": "result/test_last_products.json",
-                "log_file": "result/test_monitor.log"
-            }
-        })
+        # test_config.update({
+        #     "monitoring": {
+        #         "check_interval_minutes": 1,
+        #         "urls": ["http://localhost:5001/api/products"]
+        #     },
+        #     "email": {
+        #         "smtp_server": test_config.get("email", {}).get("smtp_server", "smtp.163.com"),
+        #         "smtp_port": test_config.get("email", {}).get("smtp_port", 465),
+        #         "sender_email": test_config.get("email", {}).get("sender_email", "inform723@163.com"),
+        #         "sender_password": "test_password",  # Override for testing
+        #         "recipient_emails": test_config.get("email", {}).get("recipient_emails", ["weiyuqi723@126.com"]),
+        #         "subject_prefix": "[TEST监控]"
+        #     },
+        #     "storage": {
+        #         "last_products_file": "result/test_last_products.json",
+        #         "log_file": "test_monitor.log"
+        #     }
+        # })
         
         # Ensure watchlist exists
         if "watchlist" not in test_config:
@@ -136,5 +147,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n🛑 Test stopped by user")
     except Exception as e:
+        traceback.print_exc()
         print(f"❌ Error: {e}")
         print("💡 Make sure test server is running: cd test && python3 test_server.py")

@@ -1,6 +1,6 @@
 {
   "monitoring": {
-    "check_interval_minutes": 5,
+    "check_interval_minutes": 0.5,
     "urls": [
       "http://localhost:5001/api/products"
     ]
@@ -33,7 +33,7 @@
     "smtp_server": "smtp.163.com",
     "smtp_port": 465,
     "sender_email": "inform723@163.com",
-    "sender_password": "test_password",
+    "sender_password": "QSk4yTHHLV22Ubcd",
     "recipient_emails": [
       "weiyuqi723@126.com"
     ],
@@ -41,6 +41,6 @@
   },
   "storage": {
     "last_products_file": "result/test_last_products.json",
-    "log_file": "result/test_monitor.log"
+    "log_file": "test_monitor.log"
   }
 }

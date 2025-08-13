@@ -1,6 +1,6 @@
 {
   "monitoring": {
-    "check_interval_minutes": 30,
+    "check_interval_minutes": 5,
     "urls": [
       "https://www.hermes.com/hk/en/category/women/bags-and-small-leather-goods/bags-and-clutches/"
     ]

@@ -10,7 +10,8 @@ import re
 import time
 import os
 import smtplib
-import logging
+from loguru import logger
+import traceback
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -40,7 +41,7 @@ class HermesMonitor:
         
         # Setup logging
         self.setup_logging()
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
         
         # Create directories
         os.makedirs(self.result_dir, exist_ok=True)
@@ -59,14 +60,7 @@ class HermesMonitor:
     
     def setup_logging(self):
         """Setup logging configuration"""
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(self.log_file, encoding='utf-8'),
-                logging.StreamHandler()
-            ]
-        )
+        logger.add(sink=self.log_file, level="INFO")
     
     def setup_driver(self):
         """Setup Chrome driver for monitoring"""
@@ -352,8 +346,9 @@ Hermès Product Update - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             msg.attach(MIMEText(body, 'plain', 'utf-8'))
             
             # Send email
-            server = smtplib.SMTP(email_config["smtp_server"], email_config["smtp_port"])
-            server.starttls()
+            server = smtplib.SMTP_SSL(email_config["smtp_server"], port=email_config["smtp_port"])
+            # server = smtplib.SMTP(email_config["smtp_server"], email_config["smtp_port"])
+            # server.starttls()
             server.login(email_config["sender_email"], email_config["sender_password"])
             
             text = msg.as_string()
@@ -363,6 +358,7 @@ Hermès Product Update - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             self.logger.info(f"📧 Email sent: {len(new_products)} new, {len(matched_products)} matches")
             
         except Exception as e:
+            traceback.print_exc()
             self.logger.error(f"Email send failed: {e}")
     
     def monitor_loop(self):
