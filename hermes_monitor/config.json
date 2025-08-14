@@ -41,6 +41,20 @@
   },
   "storage": {
     "last_products_file": "result/last_products.json",
-    "log_file": "result/monitor.log"
+    "log_file": "result/monitor.log",
+    "purchase_history_file": "result/purchase_history.json",
+    "screenshot_dir": "result/screenshots"
+  },
+  "purchase": {
+    "enabled": false,
+    "login_credentials": {
+      "email": "your_email@example.com",
+      "password": "your_password"
+    },
+    "purchase_settings": {
+      "max_price": 100000,
+      "timeout_seconds": 60,
+      "take_screenshots": true
+    }
   }
 }

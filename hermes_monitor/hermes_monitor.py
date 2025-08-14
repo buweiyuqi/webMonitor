@@ -17,6 +17,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import List, Dict, Any, Set
 
+# Import auto purchase module
+try:
+    from auto_purchase import AutoPurchase
+    AUTO_PURCHASE_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Auto purchase module not available: {e}")
+    AUTO_PURCHASE_AVAILABLE = False
+
 try:
     from selenium import webdriver
     from selenium.webdriver.common.by import By
@@ -45,6 +53,17 @@ class HermesMonitor:
         
         # Create directories
         os.makedirs(self.result_dir, exist_ok=True)
+        
+        # Initialize auto purchase
+        if AUTO_PURCHASE_AVAILABLE:
+            self.auto_purchase = AutoPurchase(self.config)
+            if self.auto_purchase.is_purchase_enabled():
+                self.logger.info("🛒 Auto purchase module initialized")
+            else:
+                self.logger.info("🛒 Auto purchase disabled in config")
+        else:
+            self.auto_purchase = None
+            self.logger.warning("🛒 Auto purchase module not available")
         
     def load_config(self, config_file):
         """Load configuration from JSON file"""
@@ -397,6 +416,9 @@ Hermès Product Update - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     
                     # Save detailed report
                     self.save_monitoring_report(current_products, new_products, matched_products)
+                    
+                    # Attempt auto purchase for matched products
+                    self.attempt_auto_purchase(matched_products)
                 else:
                     self.logger.info("✅ No changes detected")
                 
@@ -434,6 +456,31 @@ Hermès Product Update - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         
         self.logger.info(f"📄 Report saved: {report_file}")
     
+    def attempt_auto_purchase(self, matched_products: List[Dict[str, Any]]):
+        """尝试对匹配的商品进行自动购买"""
+        if not self.auto_purchase or not matched_products:
+            return
+        
+        if not self.auto_purchase.is_purchase_enabled():
+            self.logger.info("自动购买功能未启用")
+            return
+        
+        self.logger.info(f"🛒 开始尝试自动购买 {len(matched_products)} 个匹配商品")
+        
+        for product in matched_products:
+            try:
+                self.logger.info(f"尝试购买: {product.get('name', 'Unknown')}")
+                result = self.auto_purchase.attempt_purchase(product)
+                
+                if result["success"]:
+                    self.logger.info(f"✅ 商品 {product.get('name')} 购买流程已启动")
+                else:
+                    self.logger.warning(f"❌ 商品 {product.get('name')} 购买失败: {result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                self.logger.error(f"自动购买过程中发生错误: {e}")
+                traceback.print_exc()
+    
     def run_single_check(self):
         """Run a single monitoring check"""
         self.logger.info("🔍 Running single monitoring check...")
@@ -458,6 +505,9 @@ Hermès Product Update - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             self.send_email_notification(new_products, matched_products)
             self.save_last_products(current_products)
             self.save_monitoring_report(current_products, new_products, matched_products)
+            
+            # Attempt auto purchase for matched products
+            self.attempt_auto_purchase(matched_products)
         else:
             self.logger.info("✅ No new products or watchlist matches")
 
